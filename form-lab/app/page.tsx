@@ -17,7 +17,7 @@ export default function Home() {
   const elementos = ["Au", "Ag"]
   const estados = ["A", "B"]
 
-  let labels = [
+  const labels = [
     ["S. Pregnant 1", "S. Pregnant 6", "S. Pregnant 11", "S. Pregnant 16", "S. Pregnant 21"],
     ["S. Pregnant 2", "S. Pregnant 7", "S. Pregnant 12", "S. Pregnant 17", "S. Pregnant 22"],
     ["S. Pregnant 3", "S. Pregnant 8", "S. Pregnant 13", "S. Pregnant 18", "S. Pregnant 23"],
@@ -31,6 +31,7 @@ export default function Home() {
   );
 
   // Función para manejar el cambio de valor de los inputs
+  // eslint-disable-next-line
   const handleInputChange = (rowIndex: number, colIndex: number, value: any) => {
     // Crear una copia de la matriz de inputs
     const newInputs = [...inputs];

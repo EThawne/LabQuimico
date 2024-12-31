@@ -1,0 +1,32 @@
+{
+    "apps": [
+      {
+        "name": "form-lab", 
+        "cwd": "./form-lab", 
+        "script": "npm", 
+        "args": "start", 
+        "env": {
+          "NODE_ENV": "production"
+        },
+        "log_date_format": "YYYY-MM-DD HH:mm:ss",
+        "output": "./logs/form-lab.log",
+        "error": "./logs/form-lab.log",
+        "instances": 1,
+        "autorestart": true
+      },
+      {
+        "name": "server",
+        "cwd": "./server",
+        "script": "node",
+        "args": "index.js",
+        "env": {
+          "NODE_ENV": "production"
+        },
+        "log_date_format": "YYYY-MM-DD HH:mm:ss",
+        "output": "./logs/server.log",
+        "error": "./logs/server.log",
+        "instances": 1,
+        "autorestart": true
+      }
+    ]
+  }
