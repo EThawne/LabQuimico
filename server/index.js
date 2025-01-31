@@ -5,8 +5,7 @@ import 'dotenv/config'
 
 import cors from "cors";
 import { sequelize } from "./config/db.js";
-import { Resumen } from "./models/resumen.model.js";
-import { constants, puntuales } from "./constants/constans.js";
+import { muestras, puntuales } from "./constants/constans.js";
 import multer from "multer";
 import { Puntuales } from "./models/puntual.model.js";
 
@@ -14,12 +13,7 @@ const app = express();
 
 app.use(cors());
 
-//Lectura y parseo del body
 app.use(express.json());
-
-app.get("/test/hello", async (req, res) => {
-    return res.json({ message: "Servidor corriendo" })
-})
 
 app.post("/lab/muestras", async (req, res) => {
 
@@ -61,44 +55,24 @@ app.post("/files/leer-excel", upload.array("files"), async (req, res) => {
         const sheetA = workbookA.Sheets[workbookA.SheetNames[0]];
         const sheetB = workbookB.Sheets[workbookB.SheetNames[0]];
 
-        const muestrasA = getMuestrasDB(constants.celdas, sheetA, "A")
-        const muestrasB = getMuestrasDB(constants.celdas, sheetB, "B")
-        
+        const muestrasA = getMuestrasDB(muestras.celdas, sheetA, "A")
+        const muestrasB = getMuestrasDB(muestras.celdas, sheetB, "B")
 
-        console.log(muestrasA)
-        console.log(muestrasB)
+        const punt = getPuntuales(puntuales.celdas, sheetB)
+        const _punt = []
 
-        // let resumen = []
+        punt.map((puntual, i) => {
+            _punt.push({ Codigo: null, Hora: "05:00:00", Solucion: puntuales.soluciones[i], Valor: puntual })
+        })
 
-        // const matriz = getResumenes(constants.columnas, sheet) 
+        console.log(_punt)
 
-        // matriz.map((fila, i) => {
-        //     fila.map((value, j) => {
-        //         resumen.push({Codigo: null, Circuito: constants.circuitos[i], Elemento: constants.elements[j], Solucion: constants.soluciones[j], Valor: value})
-        //     })    
-        // })
+        await sequelize.transaction(async t => {
 
-        // const punt = getPuntuales(puntuales.celdas, sheet)
-        // const _punt = []
-
-        // punt.map((fila, i) => {
-        //     fila.map((value, j) => {
-        //         _punt.push({Codigo: null, Hora: puntuales.horas[i], Solucion: puntuales.soluciones[j], Valor: value})
-        //     })    
-        // })
-
-        // await sequelize.transaction(async t => {
-
-        //     for (let index = 0; index < 8; index++) {
-        //         await Muestra.bulkCreate(muestrasA[index], t)
-        //         await Muestra.bulkCreate(muestrasB[index], t)
-
-        //     }
-
-        //     await Resumen.bulkCreate(resumen, t)
-
-        //     await Puntuales.bulkCreate(_punt, t)
-        // })
+            await Muestra.bulkCreate(muestrasA, t)
+            await Muestra.bulkCreate(muestrasB, t)
+            await Puntuales.bulkCreate(_punt, t)
+        })
 
         return res.json({ message: "Muestras enviadas correctamente" })
     } catch (error) {
@@ -108,61 +82,41 @@ app.post("/files/leer-excel", upload.array("files"), async (req, res) => {
 })
 
 const getMuestrasDB = (celdas, sheet, turno) => {
-    const muestrasDB = [[], [], [], [],[], [], [], []]
-    celdas.map((celda, index) => {
-        const muestra = getMuestra(celda, sheet)
-        muestra.map((fila, i) => {
-            fila.map((value, j) => {
-                muestrasDB[index].push({ Codigo: null, Columna: constants.pregnants[i][j], Turno: turno, Elemento: constants.elementos[index], Estado: constants.estados[index], Ley: value })
-            })
+    const muestrasDB = []
+    const muestra = getMuestra(celdas, sheet)
+    muestra.map((fila, i) => {
+        fila.map((value, j) => {
+            muestrasDB.push({ Codigo: null, Columna: muestras.pregnants[i], Turno: turno, Elemento: muestras.elementos[j], Estado: muestras.estados[j], Ley: value })
         })
     })
 
     return muestrasDB
 }
 
-const getMuestra = (celda, sheet) => {
+const getMuestra = (celdas, sheet) => {
 
-    const values = Array.from({ length: 6 }, () => Array(5).fill(null))
+    const values = Array.from({ length: 32 }, () => Array(8).fill(null))
 
     values.map((fila, i) => {
         let suma = 19
-        fila.map((columna, j) => {
-            const cellAddress = `${celda}${j + i + suma}`; // Dirección de la celda (E8, E9, ..., E37)
+        fila.map((value, j) => {
+            const cellAddress = `${celdas[j]}${i + suma}`; // Dirección de la celda (E8, E9, ..., E37)
             const cell = sheet[cellAddress];
             values[i][j] = cell ? cell.v : 0; // Agregar el valor de la celda a la columna
-            suma += 5
         })
     })
     return values
 }
 
-// const getResumenes = (celda, sheet) => {
-
-//     const values = Array.from({ length: 5 }, () => Array(10).fill(null))
-
-//     values.map((fila, i) => {      
-//         fila.map((columna, j) => {
-//             const cellAddress = `${celda[j]}${i + 8}`; // Dirección de la celda (E8, E9, ..., E37)
-//             const cell = sheet[cellAddress];
-//             values[i][j] = cell ? Number(cell.v.toFixed(3)) : 0; // Agregar el valor de la celda a la columna
-//         })
-//     })
-//     return values
-// }
-
-// const getPuntuales = (celda, sheet) => {
-//     const values = Array.from({ length: 6 }, () => Array(10).fill(null))
-
-//     values.map((fila, i) => {      
-//         fila.map((columna, j) => {
-//             const cellAddress = `${celda[j]}${i + 49}`; // Dirección de la celda (E8, E9, ..., E37)
-//             const cell = sheet[cellAddress];
-//             values[i][j] = cell ? cell.v : 0; // Agregar el valor de la celda a la columna
-//         })
-//     })
-//     return values
-// }
+const getPuntuales = (celdas, sheet) => {
+    const values = []
+    celdas.map(celda => {
+        const cellAddress = `${celda}${56}`; // Dirección de la celda (E8, E9, ..., E37)
+        const cell = sheet[cellAddress];
+        values.push(cell ? cell.v : 0); // Agregar el valor de la celda a la columna
+    })
+    return values
+}
 
 app.listen(process.env.PORT, () => {
     console.log('Server running on port ' + process.env.PORT)
