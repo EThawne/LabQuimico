@@ -1,10 +1,11 @@
 'use client'
 import styles from "./page.module.css";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { Button } from 'primereact/button';
 import { Image } from 'primereact/image';
+import { FileUpload, FileUploadFilesEvent } from 'primereact/fileupload';
 import axios from "axios";
 
 export default function Home() {
@@ -12,6 +13,7 @@ export default function Home() {
   const [selectedTurno, setSelectedTurno] = useState(null);
   const [selectedElemento, setSelectedElemento] = useState(null);
   const [selectedEstado, setSelectedEstado] = useState(null);
+  const fileuploadRef = useRef<FileUpload>(null)
 
   const turnos = ["A", "B"];
   const elementos = ["Au", "Ag"]
@@ -62,6 +64,24 @@ export default function Home() {
       })
   }
 
+  const handleUpload = async (event: FileUploadFilesEvent) => {
+    const fileA = event.files[0]
+    const fileB = event.files[1]
+    const formData = new FormData()
+    formData.append('files', fileA)
+    formData.append('files', fileB)
+    await axios.post('http://localhost:3001/files/leer-excel', formData)
+      .then(response => {
+        alert(response.data.message)
+        fileuploadRef.current?.clear()
+      })
+      .catch(error => {
+        console.error(error)
+        alert("Error al cargar el archivo")
+      })
+
+  }
+
   return (
     <div className={styles.page}>
 
@@ -74,10 +94,22 @@ export default function Home() {
         </div>
       </div>
       <br />
-      <div className="flex flex-row">
-        <Dropdown value={selectedTurno} onChange={(e) => setSelectedTurno(e.value)} options={turnos} placeholder="Turno" className="w-full md:w-14rem mr-3" />
-        <Dropdown value={selectedElemento} onChange={(e) => setSelectedElemento(e.value)} options={elementos} placeholder="Elemento" className="w-full md:w-14rem mr-3" />
-        <Dropdown value={selectedEstado} onChange={(e) => setSelectedEstado(e.value)} options={estados} placeholder="Estado" className="w-full md:w-14rem" />
+      <div className="flex flex-row align-items-center">
+        <Dropdown showClear value={selectedTurno} onChange={(e) => setSelectedTurno(e.value)} options={turnos} placeholder="Turno" className="w-full md:w-14rem mr-3" />
+        <Dropdown showClear value={selectedElemento} onChange={(e) => setSelectedElemento(e.value)} options={elementos} placeholder="Elemento" className="w-full md:w-14rem mr-3" />
+        <Dropdown showClear value={selectedEstado} onChange={(e) => setSelectedEstado(e.value)} options={estados} placeholder="Estado" className="w-full md:w-14rem mr-3" />
+        <FileUpload
+          ref={fileuploadRef}
+          accept=".xlsx"
+          maxFileSize={1000000}
+          emptyTemplate={<p className="m-0">Arrastre y suelte un archivo aquí para cargar</p>}
+          customUpload
+          uploadHandler={(e) => handleUpload(e)}
+          chooseLabel="Seleccionar"
+          uploadLabel="Subir"
+          cancelLabel="Cancelar"
+          multiple
+        />
       </div>
       <br />
       <div className="flex flex-row justify-content-around">
