@@ -9,14 +9,9 @@ export const constants = {
         ["S. Pregnant 5", "S. Pregnant 10", "S. Pregnant 15", "S. Pregnant 20", "S. Pregnant 25"],
         ["S. Barren 1", "S. Barren 2", "S. Barren 3", "S. Barren 4", "S. Barren 5"]
     ],
-    celdas: ["C", "D", "E", "F"],
-    celdas2: ["G", "H", "J", "K"],
-    elementos: ["Au", "Au", "Ag", "Ag"],
-    elementos2: ["Cu", "CaCo","pH","CN"],
-    estados: ["A", "B", "A", "B"],
-    nulls: [null, null, null, null],
-
-
+    celdas: ["C", "D", "E", "F","G", "H", "J", "K"],
+    elementos: ["Au", "Au", "Ag", "Ag","Cu", "CaCo","pH","CN"],
+    estados: ["A", "B", "A", "B",null, null, null, null],
     //Constantes para la tabla Resumen
     circuitos: ["Cto1", "Cto2", "Cto3", "Cto4", "Cto5"],
     elements: ["Ag", "Ag", "Cu", "Cu", "CN", "CN", "pH", "pH", "CaCO", "CaCO"],

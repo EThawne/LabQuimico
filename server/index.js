@@ -61,10 +61,9 @@ app.post("/files/leer-excel", upload.array("files"), async (req, res) => {
         const sheetA = workbookA.Sheets[workbookA.SheetNames[0]];
         const sheetB = workbookB.Sheets[workbookB.SheetNames[0]];
 
-        const muestrasA = getMuestrasDB(constants.celdas, constants.elementos, constants.estados, sheetA, "A")
-        const muestrasB = getMuestrasDB(constants.celdas, constants.elementos, constants.estados, sheetB, "B")
-        const muestrasFA = getMuestrasDB(constants.celdas2, constants.elementos2, constants.nulls, sheetA, "A")
-        const muestrasFB = getMuestrasDB(constants.celdas2, constants.elementos2, constants.nulls, sheetB, "B")
+        const muestrasA = getMuestrasDB(constants.celdas, sheetA, "A")
+        const muestrasB = getMuestrasDB(constants.celdas, sheetB, "B")
+        
 
         console.log(muestrasA)
         console.log(muestrasB)
@@ -90,7 +89,7 @@ app.post("/files/leer-excel", upload.array("files"), async (req, res) => {
 
         // await sequelize.transaction(async t => {
 
-        //     for (let index = 0; index < 4; index++) {
+        //     for (let index = 0; index < 8; index++) {
         //         await Muestra.bulkCreate(muestrasA[index], t)
         //         await Muestra.bulkCreate(muestrasB[index], t)
 
@@ -108,19 +107,17 @@ app.post("/files/leer-excel", upload.array("files"), async (req, res) => {
     }
 })
 
-const getMuestrasDB = (celdas, elemento, estados, sheet, turno) => {
-    const muestrasDB = [[], [], [], []]
+const getMuestrasDB = (celdas, sheet, turno) => {
+    const muestrasDB = [[], [], [], [],[], [], [], []]
     celdas.map((celda, index) => {
         const muestra = getMuestra(celda, sheet)
         muestra.map((fila, i) => {
             fila.map((value, j) => {
-                muestrasDB[index].push({ Codigo: null, Columna: constants.pregnants[i][j], Turno: turno, Elemento: elemento[index], Estado: estados[index], Ley: value })
+                muestrasDB[index].push({ Codigo: null, Columna: constants.pregnants[i][j], Turno: turno, Elemento: constants.elementos[index], Estado: constants.estados[index], Ley: value })
             })
         })
     })
-    for (let index = 0; index < 4; index++) {
 
-    }
     return muestrasDB
 }
 
